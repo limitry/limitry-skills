@@ -1,0 +1,11 @@
+{
+  "name": "limitry",
+  "description": "Use when working with Limitry (limitry.com): reading or changing a workspace in Limitry, from a chat app such as Claude or ChatGPT through its MCP tools, from a terminal through the `limitry` CLI or through its API. Covers signing in, choosing the workspace, every operation, approvals and errors.",
+  "author": {
+    "name": "Limitry",
+    "url": "https://limitry.com"
+  },
+  "homepage": "https://limitry.com/docs/agents/",
+  "privacyPolicyUrl": "https://limitry.com/privacy/",
+  "termsOfServiceUrl": "https://limitry.com/terms/"
+}

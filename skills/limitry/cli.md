@@ -28,9 +28,10 @@ For a coding agent with a shell (Claude Code, Codex or another coding agent). Re
 | `limitry subjects get <subjectKind> <subjectId>` | `subjects_get` | Get a subject |
 | `limitry subjects reset <subjectKind> <subjectId>` | `subjects_reset` | Reset a subject's limits |
 | `limitry subjects update <subjectKind> <subjectId>` | `subjects_update` | Set a subject's billing date |
+| `limitry usage overview` | `usage_overview` | Get every limit's usage at once |
 | `limitry usage query` | `usage_query` | Get a limit's usage over time |
 | `limitry usage standing` | `usage_standing` | Get where a subject stands |
-| `limitry usage subjects` | `usage_subjects` | List who is using a limit now |
+| `limitry usage subjects` | `usage_subjects` | List who is using a limit |
 | `limitry user me` | — | Get the current user |
 | `limitry user revoke-token` | — | Revoke the token making this request |
 | `limitry workspace approval-actions list` | `workspace_approval_actions_list` | List the actions you can ask approval for |

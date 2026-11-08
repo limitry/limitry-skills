@@ -154,9 +154,14 @@ https://limitry.com/docs/guides/sync-from-github/
 
 ## Usage
 
-To answer "how much is X using?": `usage subjects` (`GET /v1/usage/subjects?limitId=`)
-lists a limit's subjects in the current window — used, left, refused — and
-`usage query` (`GET /v1/usage?limitId=`) gives a series by day or hour.
+To answer "how much is X using?": `usage overview` (`GET /v1/usage/overview`)
+gives every active limit at once — its total and top subjects, in the
+current window or a `period`; `usage subjects` (`GET /v1/usage/subjects?limitName=`)
+lists one limit's subjects — used, left, refused — and `usage query`
+(`GET /v1/usage?limitName=`) gives its series by day or hour, with a `total`.
+Every operation on one limit (`limits get|update|archive|restore`,
+`limits credits list|create`, the `limit.credit` approval) takes the
+limit's name wherever it takes its id.
 This is Limitry's usage of the person's limits — not the person's own
 Limitry plan (`workspace usage`). Reports trail live checks by up to a
 minute.
@@ -192,50 +197,88 @@ the person for the id, or which limit to look in, then match it in
 `usage_subjects`. If you can't tell which subject is "Acme", ask; never
 guess.
 
+**One call each.** Answer every question below with ONE call; never
+call `limits_list` or `limits_get` first to find a limit or read its
+unit. Every usage answer carries each limit's `limitName`, `unit`,
+`amount` and `window`. Ranges: a `period` (`today`, `this_week`,
+`last_week`, `this_month`, `last_month`; UTC, weeks from Monday), or
+`from` and `to`.
+
+- The person names no limit ("on AI", "a limit", "our usage"):
+  `usage_overview`. It returns every active limit; pick the one the
+  question means from the names, and say which you read.
+- The person names one ("the AI budget"): `usage_query` or
+  `usage_subjects` with `limitName`. A name matches an active limit,
+  exactly or else ignoring case; a 400 names the limits it could mean.
+
+**"How much did we spend on AI last month?"**
+
+`usage_overview` with `period: "last_month"`: read the AI limit's
+`total` (`used`, `allowed`, `refused`); never sum points yourself. Named
+("the AI budget"): `usage_query` with `limitName` and the period. Give
+units as the limit names them (`cents` is money: 12,345 cents is
+$123.45).
+
+**"Who spent the most last month?"**
+
+`usage_overview` with `period: "last_month"` (each limit's top
+subjects, most used first; `top` up to 20), or `usage_subjects` with
+`limitName` and the period. In a past period `remaining` is null.
+
 **"Which customers are close to their limit?"**
 
-1. `limits_list` (active limits only).
-2. `usage_subjects` for each limit: used, remaining, refused, most used
-   first.
-3. Report the subjects at 80% or more of `amount` (a balance, window
-   `total`: 20% or less left), with the limit's name and when the window
+1. `usage_overview` with no period: each limit's current window, its
+   top subjects with used, remaining and refused, and `resetsAt`.
+   (`usage_subjects` with `limitName` for one limit's longer list.)
+2. Report the subjects at 80% or more of `amount` (a balance, window
+   `total`: 20% or less left), with the limit's name and when it
    resets. Skip `concurrent` limits: they count slots in use now, not
    spend.
-4. Stop there. Raising a limit, adding credits or contacting the
+3. Stop there. Raising a limit, adding credits or contacting the
    customer is the person's call.
 
 **"How much did Acme use in October?"**
 
-1. Find the subject, then the limits on it: `usage_standing` with
-   `subject` (and `shared` for its team) lists them.
-2. `usage_query` for each limit with `subject`, `from` and `to` (ISO
-   8601, UTC: October is `2026-10-01T00:00:00Z` to
-   `2026-11-01T00:00:00Z`), and `granularity: "day"` for day by day.
-   The total is the sum of the points' `used`.
-3. Give units as the limit names them (`cents` is money: 12,345 cents is
-   $123.45). Usage older than the workspace's plan keeps (Free: 7 days)
-   isn't returned: say so, never report it as zero.
+1. Find the subject (above). `usage_query` with `limitName`, `subject`,
+   and `from` and `to` (ISO 8601, UTC: October is
+   `2026-10-01T00:00:00Z` to `2026-11-01T00:00:00Z`; or `period:
+"last_month"`); `granularity: "day"` for day by day. Report `total`.
+   If you don't know which limit, `usage_standing` with `subject` lists
+   the limits on it.
+2. Usage older than the workspace's plan keeps (Free: 7 days) isn't
+   returned, and `from` in the answer says where it starts: say so,
+   never report it as zero.
 
 **"Who was refused, and why?"**
 
-`usage_subjects` per limit gives `refused` in the current window;
-`usage_query` gives `refused` per day, across subjects or for one. A
-refusal is the limit working. Say which limit refused and how often,
-and leave whether to raise it to the person.
+`usage_overview` with `sort: "refused"` (and a `period` for a past
+range) lists, under each limit, only the subjects it refused, the most
+refused first. A refusal is the limit working. Say which limit refused
+and how often, and leave whether to raise it to the person.
+
+**"Which teams bought credits this month?"**
+
+Credits are added to a balance (a limit with window `total`), not used:
+`usage_overview` with `period: "this_month"` gives each balance's
+`credits` in the period: `added`, `takenBack` and the `latest`, newest
+first, with subject, amount, note and date. For the full history,
+`limits_credits_list` with the balance's id or name. `usage_subjects`
+shows what each subject has used and has left, not what it bought.
 
 **"A monthly usage summary"**
 
-For each active limit: `usage_query` for the month (no `subject`), and
-`usage_subjects` for the busiest subjects. Write a short table per
-limit: total used, checks allowed and refused, the busiest subjects.
-Add `workspace_usage` only if asked about Limitry's own bill: it is the
-workspace's Limitry plan, not the customers' usage.
+`usage_overview` with `period: "last_month"`: every limit's total and
+its busiest subjects in one answer. Write a short table per limit with
+use: total used, checks allowed and refused, the busiest subjects; say
+which limits had none. Add `workspace_usage` only if asked about
+Limitry's own bill: it is the workspace's Limitry plan, not the
+customers' usage.
 
 **"Acme paid for more credits. Add them."**
 
 You never add credits yourself. Find the balance (a limit with window
 `total`) and the subject, confirm the amount and the environment (live)
-with the person, then file the `limit.credit` approval with `limitId`,
+with the person, then file the `limit.credit` approval with `limitId` (its id or name),
 `subject`, `amount` and `environment: "live"`, and show the approval
 link. An owner or admin approves it in Limitry. Raising a limit's
 `amount` instead (`limits_update`) changes it for every subject on that

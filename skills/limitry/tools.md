@@ -25,9 +25,10 @@ For an agent with Limitry's MCP tools: Claude, ChatGPT, an always-on agent or an
 | `subjects_get` | Get a subject |
 | `subjects_reset` | Reset a subject's limits |
 | `subjects_update` | Set a subject's billing date |
+| `usage_overview` | Get every limit's usage at once |
 | `usage_query` | Get a limit's usage over time |
 | `usage_standing` | Get where a subject stands |
-| `usage_subjects` | List who is using a limit now |
+| `usage_subjects` | List who is using a limit |
 | `workspace_approval_actions_list` | List the actions you can ask approval for |
 | `workspace_approval_requests_create` | Ask a person to approve an action |
 | `workspace_approval_requests_get` | Check an approval request |

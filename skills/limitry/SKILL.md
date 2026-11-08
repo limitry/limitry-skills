@@ -5,7 +5,7 @@ description: Use when working with Limitry (limitry.com): reading or changing a 
 
 # Limitry
 
-Limitry is the limits, credits and budgets layer for the software you build: give each of your users, teams, tenants, API keys or agents an allowance, and before any costly action one call tells your code whether it may happen.
+Limitry is the limits, credits and budgets layer for the software you build: give each of your users, teams, tenants, API keys or agents an allowance, and before any costly request one call tells your code whether it may happen.
 
 Everything belongs to a **workspace**. You act as the person who signed
 you in, with their role in that workspace and only the access they

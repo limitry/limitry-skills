@@ -321,7 +321,7 @@ reuse its names unless they have their own:
 
 | Job                                                               | Subject                 | Action        | Limit                                                      | Call                                  |
 | ----------------------------------------------------------------- | ----------------------- | ------------- | ---------------------------------------------------------- | ------------------------------------- |
-| The product's AI features, paid per token, for each of your users | `user`                  | `ai-call`     | 200 `cents` a `month` (or a count, e.g. 100 a `day`)       | `reserve` a `cost`, then the real one |
+| The product's AI features, paid per token, for each of your users | `user`                  | `ai-call`     | 200 `cents` a `month`                                      | `reserve` a `cost`, then the real one |
 | Credits a whole team spends                                       | `user`, `shared` `team` | `report`      | `total` balance on `team`; credits on payment; report = 25 | `guard` with `cost`                   |
 | Rate limits for the product's own API                             | `apikey`                | `api-request` | 60 per `minute` and 1,000 per `hour`, both `rolling`       | `guard`; refusal → 429 Retry-After    |
 | The product's AI agents, spending on models and paid tools        | `agent`                 | `tool`        | 500 `cents` a `day` on action `*`, `failMode: closed`      | `reserve` a `cost`, then the real one |

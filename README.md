@@ -26,3 +26,7 @@ Claude Code, as a plugin with Limitry's MCP server:
 In Claude or ChatGPT, download [the skill](https://limitry.com/docs/skill/limitry.zip) and add it in the Skills section of the settings. More: [Build with AI agents](https://limitry.com/docs/agents/).
 
 This repository is written by Limitry's release process; changes made here are replaced. Report a problem in an issue.
+
+## License
+
+Licensed under the Apache License 2.0.

@@ -6,6 +6,18 @@
     "url": "https://limitry.com"
   },
   "license": "Apache-2.0",
+  "keywords": [
+    "usage-limits",
+    "rate-limiting",
+    "credits",
+    "budgets",
+    "quotas",
+    "agent-skills",
+    "claude-code",
+    "claude-code-plugin",
+    "codex",
+    "mcp"
+  ],
   "homepage": "https://limitry.com/docs/agents/",
   "privacyPolicyUrl": "https://limitry.com/privacy/",
   "termsOfServiceUrl": "https://limitry.com/terms/"

@@ -147,10 +147,15 @@ names, changes limits that differ (an omitted field means its default)
 and leaves the rest; `--archive-missing` archives active limits the
 file doesn't name. The whole file is validated first: one bad entry
 changes nothing (`details` names it). A changed subject, action, unit
-or window under an existing name is refused: rename the entry instead. Once CI syncs the file, edits
-made in the app to those limits are overwritten on the next sync —
-say so. GitHub Actions recipe:
-https://limitry.com/docs/guides/sync-from-github/
+or window under an existing name is refused: rename the entry instead. What a
+sync sets is locked in the app and the API (`setIn`; a `PATCH` gets a 409) until the next sync, except for an owner's or admin's override
+with a reason — say so. The lock names the sync's `source`: the CLI
+sends the file's path (or `--source`), code may send its own, and
+without one it reads "Set by a sync". Prefer, in order: a committed
+`limitry.json`; one the build generates, then `limitry sync`; and only
+when no file is possible, `limits.sync` from code with a `source`
+(https://limitry.com/docs/limitry-json/#three-ways-to-sync). GitHub
+Actions recipe: https://limitry.com/docs/guides/sync-from-github/
 
 ## Usage
 

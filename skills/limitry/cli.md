@@ -14,6 +14,7 @@ For a coding agent with a shell (Claude Code, Codex or another coding agent). Re
 | Command | MCP tool | What it does |
 | --- | --- | --- |
 | `limitry check <kind>:<id> <action>` | `checks_create` | Check whether a subject may act |
+| `limitry checks recent` | `checks_recent` | List recent checks |
 | `limitry limits archive <limitId>` | `limits_archive` | Archive a limit |
 | `limitry limits create` | `limits_create` | Create a limit |
 | `limitry limits credits list <limitId>` | `limits_credits_list` | List a balance's credits |
@@ -25,8 +26,12 @@ For a coding agent with a shell (Claude Code, Codex or another coding agent). Re
 | `limitry reservations commit <reservationId>` | `reservations_commit` | Commit a reservation |
 | `limitry reservations extend <reservationId>` | `reservations_extend` | Extend a reservation |
 | `limitry reservations release <reservationId>` | `reservations_release` | Release a reservation |
+| `limitry subjects delete <subjectKind> <subjectId>` | `subjects_delete` | Erase a subject's name and labels |
 | `limitry subjects get <subjectKind> <subjectId>` | `subjects_get` | Get a subject |
+| `limitry subjects import` | `subjects_import` | Name many subjects |
+| `limitry subjects list` | `subjects_list` | List subjects |
 | `limitry subjects reset <subjectKind> <subjectId>` | `subjects_reset` | Reset a subject's limits |
+| `limitry subjects set <subjectKind> <subjectId>` | `subjects_set` | Name a subject |
 | `limitry subjects update <subjectKind> <subjectId>` | `subjects_update` | Set a subject's billing date |
 | `limitry usage overview` | `usage_overview` | Get every limit's usage at once |
 | `limitry usage query` | `usage_query` | Get a limit's usage over time |

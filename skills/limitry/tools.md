@@ -11,6 +11,7 @@ For an agent with Limitry's MCP tools: Claude, ChatGPT, an always-on agent or an
 | Tool | What it does |
 | --- | --- |
 | `checks_create` | Check whether a subject may act |
+| `checks_recent` | List recent checks |
 | `limits_archive` | Archive a limit |
 | `limits_create` | Create a limit |
 | `limits_credits_list` | List a balance's credits |
@@ -22,8 +23,12 @@ For an agent with Limitry's MCP tools: Claude, ChatGPT, an always-on agent or an
 | `reservations_commit` | Commit a reservation |
 | `reservations_extend` | Extend a reservation |
 | `reservations_release` | Release a reservation |
+| `subjects_delete` | Erase a subject's name and labels |
 | `subjects_get` | Get a subject |
+| `subjects_import` | Name many subjects |
+| `subjects_list` | List subjects |
 | `subjects_reset` | Reset a subject's limits |
+| `subjects_set` | Name a subject |
 | `subjects_update` | Set a subject's billing date |
 | `usage_overview` | Get every limit's usage at once |
 | `usage_query` | Get a limit's usage over time |

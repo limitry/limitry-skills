@@ -173,6 +173,14 @@ limit on the subject and its shared subjects with `used`, `remaining`
 and `resetsAt`; an empty `limits` list means none applies. It is not a
 check: nothing is counted.
 
+A subject's own view: `subjects get <kind> <id>` (`GET
+/v1/subjects/{kind}/{id}`, `subjects_get`) gives its name and labels if
+it has any, its budgets, and the subjects it is checked with (`links`:
+what it spent within each other subject's budget this period, or they
+within its own). `checks recent [--subject kind:id] [--refused true]`
+(`GET /v1/checks/recent`) lists the last 3 days' checks with every
+subject each named, and whose budget refused a refused one.
+
 Warnings: the webhook event `limit.threshold_crossed` fires when a
 subject first reaches 80% and 100% of a limit (a balance: 20% left, then
 none; concurrent limits never warn). Limitry never contacts the
@@ -192,10 +200,13 @@ picks **Live** when it asks where you work (or connects
 `--environment live`. Never present test figures as customers' usage.
 
 **Finding the customer.** Limitry knows subjects by the kind and id the
-person's product sends (`team:t_8f2`, `user:usr_123`), not by name. Ask
-the person for the id, or which limit to look in, then match it in
-`usage_subjects`. If you can't tell which subject is "Acme", ask; never
-guess.
+person's product sends (`team:t_8f2`, `user:usr_123`). A subject may
+also have a name and labels, which are optional: search them with
+`subjects list --q Acme` (`subjects_list`; also `--kind`, `--label
+plan:pro`). If nothing matches, ask the person for the id, or which
+limit to look in, then match it in `usage_subjects`. If you can't tell
+which subject is "Acme", ask; never guess. Names aren't unique, so
+always say the kind and id beside a name.
 
 **One call each.** Answer every question below with ONE call; never
 call `limits_list` or `limits_get` first to find a limit or read its

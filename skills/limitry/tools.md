@@ -4,7 +4,7 @@ For an agent with Limitry's MCP tools: Claude, ChatGPT, an always-on agent or an
 
 - A tool that changes something takes an `idempotencyKey`: pass the same one when you retry it. The tools already retry a failed attempt with the same key.
 - When a tool is missing, the person did not grant that access. Tell them what it would take; do not look for another way.
-- **Approvals:** `workspace_approval_actions_list` shows what can be asked and its input; `workspace_approval_requests_create` files it with your reason. Show the person the returned `approveUrl`; `approval_requests_get` tells you when it is decided.
+- **Approvals:** `workspace_approval_actions_list` shows what can be asked and its input; `workspace_approval_requests_create` files it with your reason. Show the person the returned `approveUrl`; `workspace_approval_requests_get` tells you when it is decided.
 
 ## Tools
 

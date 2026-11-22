@@ -119,8 +119,8 @@ A limit says how much of an action a subject may use per window
 tools; `archive` stops a limit and keeps its history).
 Only `subject.kind`, `amount` and `window` are required: `action`
 defaults to `*`, `unit` to `units`, and `name` to the sentence the limit
-reads as ("100 credits per user per month"; a 409 means that name is
-taken: send a `name`). Before creating one, confirm with the person:
+reads as ("100 credits per user per month"; a 409 `conflict` means
+that name is taken: send a `name`). Before creating one, confirm with the person:
 which subjects (`subject: { kind }`, plus `id` for one), which action
 (or `*`), how many per `minute`, `hour`, `day` or `month` (`rolling:
 true` for "in any 24 hours" — no burst at midnight), as a balance
@@ -140,8 +140,8 @@ kind and action match what the code sends.
 repository (reviewed in pull requests, applied by CI), write them to a
 `limitry.json` at the repository root — `{ "limits": [ … ] }`, each
 entry the fields of `limits create` plus a required `name` — and run
-`limitry sync --preview`,
-then `limitry sync` (`POST /v1/limits/sync`, the `limits_sync` tool,
+`limitry sync --dry-run`,
+then `limitry sync` (`limitry sync -` reads a generated file from stdin) (`POST /v1/limits/sync`, the `limits_sync` tool,
 `limits.sync` in the SDKs). Names are the key: it creates missing
 names, changes limits that differ (an omitted field means its default)
 and leaves the rest; `--archive-missing` archives active limits the
@@ -162,18 +162,19 @@ Actions recipe: https://limitry.com/docs/guides/sync-from-github/
 To answer "how much is X using?": `usage overview` (`GET /v1/usage/overview`)
 gives every active limit at once — its total and top subjects, in the
 current window or a `period`; `usage subjects` (`GET /v1/usage/subjects?limitName=`)
-lists one limit's subjects — used, left, refused — and `usage query`
+ranks one limit's subjects in `subjects` — used, left, refused; `top` up
+to 50, or 25 for a concurrent limit — and `usage query`
 (`GET /v1/usage?limitName=`) gives its series by day or hour, with a `total`.
 Every operation on one limit (`limits get|update|archive|restore`,
 `limits credits list|create`, the `limit.credit` approval) takes the
 limit's name wherever it takes its id.
 This is Limitry's usage of the person's limits — not the person's own
-Limitry plan (`workspace usage`). Reports trail live checks by up to a
+Limitry plan (`workspace plan-usage get`). Reports trail live checks by up to a
 minute.
 
 To answer "how much does this user have left?" exactly, now:
-`usage standing --subject user:<id> [--shared team:<id>]`
-(`GET /v1/usage/standing`, the `usage_standing` tool). It lists every
+`subjects standing user <id> [--shared team:<id>]`
+(`GET /v1/subjects/{kind}/{id}/standing`, the `subjects_standing` tool). It lists every
 limit on the subject and its shared subjects with `used`, `remaining`
 and `resetsAt`; an empty `limits` list means none applies. It is not a
 check: nothing is counted.
@@ -182,9 +183,13 @@ A subject's own view: `subjects get <kind> <id>` (`GET
 /v1/subjects/{kind}/{id}`, `subjects_get`) gives its name and labels if
 it has any, its budgets, and the subjects it is checked with (`links`:
 what it spent within each other subject's budget this period, or they
-within its own). `checks recent [--subject kind:id] [--refused true]`
-(`GET /v1/checks/recent`) lists the last 3 days' checks with every
-subject each named, and whose budget refused a refused one.
+within its own). `checks list [--subject kind:id] [--refused true]`
+(`GET /v1/checks`, `checks_list`) lists the last 3 days' checks, newest
+first (`before` starts from a moment), with every subject each named,
+and in `refusedBy` whose budget refused a refused one. Names and labels:
+`subjects update <kind> <id> --name … --labels '{…}'` (`PATCH
+/v1/subjects/{kind}/{id}`, which also sets `billingAnchorAt`); erase
+them with `subjects names delete <kind> <id>` (204).
 
 Warnings: the webhook event `limit.threshold_crossed` fires when a
 subject first reaches 80% and 100% of a limit (a balance: 20% left, then
@@ -205,7 +210,7 @@ picks **Live** when it asks where you work (or connects
 `--environment live`. Never present test figures as customers' usage.
 
 **Finding the customer.** Limitry knows subjects by the kind and id the
-person's product sends (`team:t_8f2`, `user:usr_123`). A subject may
+person's product sends (`team:t_8f2`, `user:user_123`). A subject may
 also have a name and labels, which are optional: search them with
 `subjects list --q Acme` (`subjects_list`; also `--kind`, `--label
 plan:pro`). If nothing matches, ask the person for the id, or which
@@ -259,7 +264,7 @@ subjects, most used first; `top` up to 20), or `usage_subjects` with
    and `from` and `to` (ISO 8601, UTC: October is
    `2026-10-01T00:00:00Z` to `2026-11-01T00:00:00Z`; or `period:
 "last_month"`); `granularity: "day"` for day by day. Report `total`.
-   If you don't know which limit, `usage_standing` with `subject` lists
+   If you don't know which limit, `subjects_standing` for the subject lists
    the limits on it.
 2. Usage older than the workspace's plan keeps (Free: 7 days) isn't
    returned, and `from` in the answer says where it starts: say so,
@@ -286,7 +291,7 @@ shows what each subject has used and has left, not what it bought.
 `usage_overview` with `period: "last_month"`: every limit's total and
 its busiest subjects in one answer. Write a short table per limit with
 use: total used, checks allowed and refused, the busiest subjects; say
-which limits had none. Add `workspace_usage` only if asked about
+which limits had none. Add `workspace_plan_usage_get` only if asked about
 Limitry's own bill: it is the workspace's Limitry plan, not the
 customers' usage.
 
@@ -307,11 +312,15 @@ whether a subject may do an action at a cost, and — in the default
 `consume` mode — uses it. The answer is ALWAYS 200: read `allowed`; a
 `false` is a normal answer to act on (show `limits[].remaining`, wait
 `retryAfterSeconds`; `reason.code` is `limit_reached` with
-`reason.limitId`, or `too_many_reservations`), never an error to retry. Use `mode: "preview"` to
+`reason.limitId`, `reason.limitName` and `reason.subject`, or
+`too_many_reservations`), never an error to retry. A decision has no
+`id`, and `reservation` is null unless it reserved. Use `mode: "preview"` to
 ask without using. Send an `Idempotency-Key` when the caller may retry.
-From the CLI, `limitry check user:usr_123 ai-call [--cost N] [--shared
+From the CLI, `limitry check user:user_123 ai-call [--cost N] [--shared
 team:team_42]` is the short form of `limitry checks create` (one-line
-answer; `--json` for the decision; exit 0 for a refusal too).
+answer; `--json` for the decision). It exits 0 when allowed and 5 when
+refused, so a script can gate on it; 1 is a failure, 2 wrong usage and 4
+not logged in.
 
 When users share an allowance (a team's pool), pass the team as
 `shared: [{ kind: "team", id }]` on each user's check — define the pool
@@ -370,7 +379,7 @@ something), work in this order:
 4. **Wrap the code** with the SDK (`npm install @limitry/sdk`):
 
    ```ts
-   import { createClient, LimitReached } from "@limitry/sdk";
+   import { createClient, LimitReachedError } from "@limitry/sdk";
    const limitry = createClient(); // reads LIMITRY_API_KEY
 
    // Known cost: one request against a per-key rate limit
@@ -391,10 +400,13 @@ something), work in this order:
    ```
 
    Put it right before the costly work; pass the REAL subject id and the
-   same action name as the limit. Handle `LimitReached` where the
+   same action name as the limit. Handle `LimitReachedError` where the
    product answers its user (a 429 with `retryAfterSeconds`, a message,
-   an upgrade prompt) — never swallow it. `Unavailable` is separate: a
-   limit that fails closed while Limitry is unreachable.
+   an upgrade prompt) — never swallow it. `UnavailableError` is
+   separate: a limit that fails closed while Limitry is unreachable
+   (its `reason`: `timeout`, `unreachable`, `plan_limit_reached` or
+   `rate_limited`). Both subclass `LimitryError`. In Python, the same
+   errors, and `reservation.cost = price_cents(r.usage)` sets the cost.
 
 5. **Add a test** that a refusal is handled (mock the SDK or point it at
    a stub returning `allowed: false`), and tell the person which env var
@@ -430,6 +442,10 @@ Past the workspace's plan (10% grace for live; none for the test
 allowance), checks answer **402 `plan_limit_reached`** — treat it like unreachable (fail mode applies),
 and tell the person to upgrade; never retry in a loop. The SDK honours
 each limit's fail mode by itself: it remembers the last
-decision's `failMode` and, if Limitry cannot be reached within 1.5 s,
-lets the work run (`open`) or throws `Unavailable` (`closed`) — never
-`LimitReached`. A 429 or 5xx from Limitry counts as unreachable.
+decision's `failMode` and, if Limitry cannot be reached within its
+`timeout` (1.5 s by default, tries included; `createLimits(client, {
+timeout })` or per call), lets the work run (`open`) or throws
+`UnavailableError` (`closed`) — never `LimitReachedError`. A 429 or 5xx
+from Limitry counts as unreachable; a 503 `unavailable` carries
+Retry-After. A call's `signal` (or, in Python, cancelling the task)
+ends the check at once and the work never runs.

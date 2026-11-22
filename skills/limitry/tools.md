@@ -11,9 +11,10 @@ For an agent with Limitry's MCP tools: Claude, ChatGPT, an always-on agent or an
 | Tool | What it does |
 | --- | --- |
 | `checks_create` | Check whether a subject may act |
-| `checks_recent` | List recent checks |
+| `checks_list` | List checks |
 | `limits_archive` | Archive a limit |
 | `limits_create` | Create a limit |
+| `limits_credits_get` | Get a credit |
 | `limits_credits_list` | List a balance's credits |
 | `limits_get` | Get a limit |
 | `limits_list` | List limits |
@@ -22,17 +23,17 @@ For an agent with Limitry's MCP tools: Claude, ChatGPT, an always-on agent or an
 | `limits_update` | Change a limit |
 | `reservations_commit` | Commit a reservation |
 | `reservations_extend` | Extend a reservation |
+| `reservations_get` | Get a reservation |
 | `reservations_release` | Release a reservation |
-| `subjects_delete` | Erase a subject's name and labels |
 | `subjects_get` | Get a subject |
 | `subjects_import` | Name many subjects |
 | `subjects_list` | List subjects |
+| `subjects_names_delete` | Erase a subject's name and labels |
 | `subjects_reset` | Reset a subject's limits |
-| `subjects_set` | Name a subject |
-| `subjects_update` | Set a subject's billing date |
+| `subjects_standing` | Get where a subject stands |
+| `subjects_update` | Update a subject |
 | `usage_overview` | Get every limit's usage at once |
 | `usage_query` | Get a limit's usage over time |
-| `usage_standing` | Get where a subject stands |
 | `usage_subjects` | List who is using a limit |
 | `workspace_approval_actions_list` | List the actions you can ask approval for |
 | `workspace_approval_requests_create` | Ask a person to approve an action |
@@ -42,8 +43,8 @@ For an agent with Limitry's MCP tools: Claude, ChatGPT, an always-on agent or an
 | `workspace_get` | Get the current workspace |
 | `workspace_invitations_list` | List pending invitations |
 | `workspace_members_list` | List workspace members |
+| `workspace_plan_usage_get` | Get your plan's usage this period |
 | `workspace_teams_list` | List teams |
-| `workspace_usage` | Get your plan's usage this period |
 | `workspace_webhook_deliveries_list` | List an endpoint's deliveries |
 | `workspace_webhook_deliveries_redeliver` | Redeliver an event |
 | `workspace_webhook_endpoints_get` | Get a webhook endpoint |

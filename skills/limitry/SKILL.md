@@ -127,7 +127,8 @@ true` for "in any 24 hours" — no burst at midnight), as a balance
 (`total`) or at once (`concurrent`), and whether their product should
 allow or refuse when Limitry is unreachable (`failMode`, default `open`
 = allow). Every count is stored before a check answers. Creating and
-changing limits needs an owner's or admin's token.
+changing limits needs an owner's or admin's token in live; a member's
+works in test only.
 
 What a limit counts is FIXED once created: `subject`, `action`, `unit`,
 `window`, `every`, `start`, `rolling`. Changing one is refused (400);
@@ -174,13 +175,13 @@ minute.
 
 To answer "how much does this user have left?" exactly, now:
 `subjects standing user <id> [--shared team:<id>]`
-(`GET /v1/subjects/{kind}/{id}/standing`, the `subjects_standing` tool). It lists every
+(`GET /v1/subjects/{subjectKind}/{subjectId}/standing`, the `subjects_standing` tool). It lists every
 limit on the subject and its shared subjects with `used`, `remaining`
 and `resetsAt`; an empty `limits` list means none applies. It is not a
 check: nothing is counted.
 
 A subject's own view: `subjects get <kind> <id>` (`GET
-/v1/subjects/{kind}/{id}`, `subjects_get`) gives its name and labels if
+/v1/subjects/{subjectKind}/{subjectId}`, `subjects_get`) gives its name and labels if
 it has any, its budgets, and the subjects it is checked with (`links`:
 what it spent within each other subject's budget this period, or they
 within its own). `checks list [--subject kind:id] [--refused true]`
@@ -188,7 +189,7 @@ within its own). `checks list [--subject kind:id] [--refused true]`
 first (`before` starts from a moment), with every subject each named,
 and in `refusedBy` whose budget refused a refused one. Names and labels:
 `subjects update <kind> <id> --name … --labels '{…}'` (`PATCH
-/v1/subjects/{kind}/{id}`, which also sets `billingAnchorAt`); erase
+/v1/subjects/{subjectKind}/{subjectId}`, which also sets `billingAnchorAt`); erase
 them with `subjects names delete <kind> <id>` (204).
 
 Warnings: the webhook event `limit.threshold_crossed` fires when a
@@ -373,7 +374,7 @@ something), work in this order:
    change it — a wrong limit blocks their real users. Never create
    limits they have not agreed to.
 3. **Create the agreed limits in test** (`limits create`, or the
-   `limits_create` tool) with an owner's or admin's token. Your token
+   `limits_create` tool); in test, a member's token is enough. Your token
    acts in test unless told otherwise; confirm the output says
    `Environment: test`.
 4. **Wrap the code** with the SDK (`npm install @limitry/sdk`):
